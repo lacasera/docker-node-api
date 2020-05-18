@@ -1,0 +1,33 @@
+pipelines:
+  default:
+  - step:
+      name: Build and Test
+      image: node:10.15.0
+      caches:
+      - node
+      script:
+      - npm install
+      - npm test
+
+  branches:
+    master:
+    - step:
+        name: Deploy to Registry
+        script:
+        - export IMAGE_NAME=lacasera/digital-ocean-test-app:$BITBUCKET_COMMIT
+        - docker build -t $IMAGE_NAME .
+        - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
+        - docker push $IMAGE_NAME
+
+    - step:
+       name: Deploy to droplet
+       script:
+        - pipe: atlassian/ssh-run:0.2.2
+          variables:
+            SSH_USER: $SSH_USER
+            SERVER: $SSH_SERVER
+            COMMAND: >
+              docker stop $CONTAINERS_TO_STOP
+              docker run -p $SERVER_PORT:$SERVER_PORT -d  $IMAGE_NAME
+       services:
+        - docker
