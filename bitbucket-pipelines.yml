@@ -14,7 +14,7 @@ pipelines:
     - step:
         name: Deploy to Registry
         script:
-        - export IMAGE_NAME=lacasera/digital-ocean-test-app:$BITBUCKET_COMMIT
+        - export IMAGE_NAME=your_username/your_project_name:$BITBUCKET_COMMIT
         - docker build -t $IMAGE_NAME .
         - docker login --username $DOCKER_HUB_USERNAME --password $DOCKER_HUB_PASSWORD
         - docker push $IMAGE_NAME
@@ -22,6 +22,7 @@ pipelines:
     - step:
        name: Deploy to droplet
        script:
+        - export IMAGE_NAME=your_username/your_project_name:$BITBUCKET_COMMIT
         - pipe: atlassian/ssh-run:0.2.2
           variables:
             SSH_USER: $SSH_USER
